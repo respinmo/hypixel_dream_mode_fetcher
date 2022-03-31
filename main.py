@@ -1,3 +1,5 @@
+#!/usr/bin/env/ python3
+
 import re
 import requests
 import configparser
@@ -21,6 +23,8 @@ game_modes = {
     }
 }
 
+regular_game_modes = ["BEDWARS_TWO_FOUR", "BEDWARS_EIGHT_ONE", "BEDWARS_EIGHT_TWO"
+                      , "BEDWARS_FOUR_FOUR", "BEDWARS_EIGHT_TWO_TOURNEY", "BEDWARS_FOUR_THREE"]
 
 def create_blank_config_file(filename):
     config = configparser.ConfigParser()
@@ -45,14 +49,19 @@ def get_hypixel_playercount(api_key):
     return response
 
 
-def get_all_dream_mode_names():
+def get_hypxiel_game_modes(api_key):
+    headers = {
+        "API-Key": api_key
+    }
+    response = requests.get("https://api.hypixel.net/resources/games", headers=headers)
+    return response.json()["games"]["BEDWARS"]["modeNames"]
+
+def get_all_dream_mode_names(config_file="config.ini"):
     results = []
-    for i in game_modes:
-        if i != "castle":
-            results.append("BEDWARS_FOUR_FOUR_" + i.upper())
-            results.append("BEDWARS_EIGHT_TWO_" + i.upper())
-        else:
-            results.append("BEDWARS_CASTLE")
+    game_modes = get_hypxiel_game_modes(get_api_key_from_file(config_file))
+    for i in game_modes.keys():
+        if i not in regular_game_modes:
+            results.append(i)
     return results
 
 
@@ -74,5 +83,6 @@ def extract_highest_dream_game_mode(count_json):
 
 
 if __name__ == '__main__':
-    json = get_hypixel_playercount(get_api_key_from_file("config.ini")).json()
+    api = get_api_key_from_file("config.ini")
+    json = get_hypixel_playercount(api).json()
     print(extract_highest_dream_game_mode(json))
