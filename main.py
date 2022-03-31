@@ -1,5 +1,4 @@
-#!/usr/bin/env/ python3
-import aifc
+#!/usr/bin/env python3
 import re
 import requests
 import configparser
