@@ -1,30 +1,13 @@
 #!/usr/bin/env/ python3
-
+import aifc
 import re
 import requests
 import configparser
-
-game_modes = {
-    "lucky": {
-    },
-    "armed":{
-    },
-    "swap": {
-    },
-    "ultimate": {
-    },
-    "voidless": {
-    },
-    "rush": {
-    },
-    "underworld": {
-    },
-    "castle": {
-    }
-}
+import sys
 
 regular_game_modes = ["BEDWARS_TWO_FOUR", "BEDWARS_EIGHT_ONE", "BEDWARS_EIGHT_TWO"
                       , "BEDWARS_FOUR_FOUR", "BEDWARS_EIGHT_TWO_TOURNEY", "BEDWARS_FOUR_THREE"]
+
 
 def create_blank_config_file(filename):
     config = configparser.ConfigParser()
@@ -56,6 +39,7 @@ def get_hypxiel_game_modes(api_key):
     response = requests.get("https://api.hypixel.net/resources/games", headers=headers)
     return response.json()["games"]["BEDWARS"]["modeNames"]
 
+
 def get_all_dream_mode_names(config_file="config.ini"):
     results = []
     game_modes = get_hypxiel_game_modes(get_api_key_from_file(config_file))
@@ -82,7 +66,44 @@ def extract_highest_dream_game_mode(count_json):
     return maxmode
 
 
-if __name__ == '__main__':
-    api = get_api_key_from_file("config.ini")
-    json = get_hypixel_playercount(api).json()
+def check_api_working(api_key):
+    headers = {
+        "API-Key": api_key
+    }
+    response = requests.get("https://api.hypixel.net/key", headers=headers)
+    if response.json()["success"]:
+        return True
+    else:
+        return False
+
+
+def main():
+    config_file_name = ""
+    api_key = ""
+    if len(sys.argv) < 2:
+        config_file_name = "config.ini"
+    else:
+        config_file_name = sys.argv[1]
+    try:
+        with open(config_file_name) as f:
+            api_key = get_api_key_from_file(config_file_name)
+    except IOError:
+        if not re.match("(.*).ini", config_file_name):
+            config_file_name = config_file_name + ".ini"
+        while True:
+            choice = input("No config file with specified name found. Create \"" + config_file_name+ "\"?(y/n)")
+            if choice == "y":
+                print("config file created, please fill in your api key now")
+                create_blank_config_file(config_file_name)
+                exit(0)
+            elif choice == "n":
+                exit(1)
+    if not check_api_working(api_key):
+        print("Your api key doesn't work, please verify that everything is in order")
+        exit(2)
+    json = get_hypixel_playercount(api_key).json()
     print(extract_highest_dream_game_mode(json))
+
+
+if __name__ == '__main__':
+    main()
