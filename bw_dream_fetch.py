@@ -9,11 +9,15 @@ import logging
 # This allows to prepare for dream modes that may be added in the future
 REGULAR_GAME_MODES = ["BEDWARS_TWO_FOUR", "BEDWARS_EIGHT_ONE", "BEDWARS_EIGHT_TWO"
     , "BEDWARS_FOUR_FOUR", "BEDWARS_EIGHT_TWO_TOURNEY", "BEDWARS_FOUR_THREE"]
+# other global stuff
 API_ENDPOINT_URLS = {
     "api_key": "https://api.hypixel.net/key",
     "games": "https://api.hypixel.net/resources/games",
     "playercount": "https://api.hypixel.net/counts"
 }
+
+logging.basicConfig()
+log = logging.getLogger("bedwar_fetch")
 
 
 # basic setup functions
@@ -25,7 +29,13 @@ def parse_all_args():
     parser.add_argument("--history", default="history.txt", help="The history file to be used(TBI)")
     parser.add_argument("--all", "-a", default=False, action="store_true",
                         help="Display All Dream Game Modes along with player Count")
+    parser.add_argument("--verbose", "-v", default=False, action="store_true",
+                        help="Enable additional potentially helpfull output")
     return parser.parse_args()
+
+
+def setup_logger(args):
+    log.setLevel(logging.INFO if args.verbose else logging.WARNING)
 
 
 # setting up and reading config file
@@ -123,9 +133,12 @@ def extract_highest_dream_game_mode(count_json, api_key):
 
 def try_read_create_config_file(config_file_name):
     try:
+        log.info("Attempting to read config file " + config_file_name + "...")
         with open(config_file_name) as f:
+            log.info("Success!")
             return get_api_key_from_file(config_file_name)
     except IOError:
+        log.info("Failed to read and/or find config file!")
         if not re.match("(.*).ini", config_file_name):
             config_file_name = config_file_name + ".ini"
         create_config_file_dialog(config_file_name)
@@ -133,6 +146,7 @@ def try_read_create_config_file(config_file_name):
 
 def main():
     args = parse_all_args()
+    setup_logger(args)
     api_key = ""
     if not args.key:
         config_file_name = args.configfile
@@ -142,7 +156,7 @@ def main():
         api_key = args.key
 
     if not check_api_key_working(api_key):
-        print("Your api key doesn't work, please verify that everything is in order")
+        log.error("Invalid API-Key")
         exit(2)
     json = get_hypixel_playercount(api_key).json()
     if args.all:
