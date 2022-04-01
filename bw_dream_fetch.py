@@ -3,6 +3,7 @@ import re
 import requests
 import configparser
 import argparse
+import logging
 
 # list all the non-dream gamemodes, to exclude them from count.
 # This allows to prepare for dream modes that may be added in the future
@@ -13,7 +14,6 @@ API_ENDPOINT_URLS = {
     "games": "https://api.hypixel.net/resources/games",
     "playercount": "https://api.hypixel.net/counts"
 }
-VERBOSE_MODE = False
 
 
 # basic setup functions
@@ -21,9 +21,9 @@ def parse_all_args():
     parser = argparse.ArgumentParser(description="Fetch current Hypixel Bedwars dream Gamemode",
                                      epilog="Overengineered? - no...")
     parser.add_argument("configfile", nargs="?", default="config.ini", help="The config file to be used")
-    parser.add_argument("--key", required=False, help="manually provided API-Key")
+    parser.add_argument("--key", "-k", required=False, help="manually provided API-Key")
     parser.add_argument("--history", default="history.txt", help="The history file to be used(TBI)")
-    parser.add_argument("--all", default=False, action="store_true",
+    parser.add_argument("--all", "-a", default=False, action="store_true",
                         help="Display All Dream Game Modes along with player Count")
     return parser.parse_args()
 
@@ -138,7 +138,6 @@ def main():
         config_file_name = args.configfile
         api_key = try_read_create_config_file(config_file_name)
         read_and_replace_url_dict(config_file_name)
-        print(API_ENDPOINT_URLS)
     elif args.key:
         api_key = args.key
 
