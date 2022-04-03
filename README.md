@@ -13,6 +13,12 @@ In order to use it you need a Hypixel API key aswell as python3 and the requests
 - run the main programm(it will generate a config file)
 - enter your api-key into the config file (you can get it by running /api on hypixel)
 - enjoy 🛌
+## Features
+
+- Detect current Dream game-mode based on playercounts
+- Corrections can be made via a config file
+- Program should be able to detect future gamemodes without adjustment!
+- (over)extensive configuration flags
 
 ## Installing
 
