@@ -45,8 +45,10 @@ def create_blank_config_file(filename):
         "hypixel_api_token": "your_key"
     }
     config["API_CONFIG"] = API_ENDPOINT_URLS
+    log.info("Attempting to Create Config file...")
     with open(filename, "w") as f:
         config.write(f)
+    log.info("Success!")
 
 
 def create_config_file_dialog(config_file_name):
@@ -61,14 +63,20 @@ def create_config_file_dialog(config_file_name):
 
 
 def get_api_key_from_file(filename):
+    log.info("Attempting to retrieve key from config file " + filename + "...")
     config = configparser.ConfigParser()
     config.read(filename)
+    log.info("Success")
+    log.info("Read API-key: " + config["ACCESS"]["hypixel_api_token"])
     return config["ACCESS"]["hypixel_api_token"]
 
 
 def read_and_replace_url_dict(filename):
+    log.info("Attempting to read API-URLs from file " + filename + "...")
     config = configparser.ConfigParser()
     config.read(filename)
+    log.info("Success!")
+    log.info("Overwriting internal URL-Configuration...")
     global API_ENDPOINT_URLS
     API_ENDPOINT_URLS = config["API_CONFIG"]
 
@@ -78,10 +86,13 @@ def check_api_key_working(api_key):
     headers = {
         "API-Key": api_key
     }
+    log.info("Checking if API-key " + api_key + "is valid...")
     response = requests.get(API_ENDPOINT_URLS["api_key"], headers=headers)
     if response.json()["success"]:
+        log.info("API-key valid!")
         return True
     else:
+        log.info("API-key invalid!")
         return False
 
 
@@ -90,7 +101,9 @@ def get_hypixel_playercount(api_key):
     headers = {
         "API-Key": api_key
     }
+    log.info("Attempting to retrieve playercounts...")
     response = requests.get(API_ENDPOINT_URLS["playercount"], headers=headers)
+    log.info("Success!")
     return response
 
 
@@ -98,34 +111,43 @@ def get_hypxiel_game_modes(api_key):
     headers = {
         "API-Key": api_key
     }
+    log.info("Attempting to retrieve names of all game modes...")
     response = requests.get(API_ENDPOINT_URLS["games"], headers=headers)
+    log.info("Success!")
     return response.json()["games"]["BEDWARS"]["modeNames"]
 
 
 def get_all_dream_mode_names(api_key):
     results = []
     game_modes = get_hypxiel_game_modes(api_key)
+    log.info("Extracting names of Dream game modes...")
     for i in game_modes.keys():
         if i not in REGULAR_GAME_MODES:
             results.append(i)
+    log.info("Done!")
     return results
 
 
 def get_dream_modes_count(count_json, api_key):
     bedwars_modes = count_json["games"]["BEDWARS"]
     dream_mode_names = get_all_dream_mode_names(api_key)
+    log.info("Extracting playercounts for dream game-modes...")
     played_dream_modes = {}
     for i in bedwars_modes["modes"].items():
         if i[0] in dream_mode_names:
             played_dream_modes[i[0]] = i[1]
+    log.info("Done!")
     return played_dream_modes
 
 
 # data processing
 def extract_highest_dream_game_mode(count_json, api_key):
     dream = get_dream_modes_count(count_json, api_key)
+    log.info("Determining dream mode with highest playercount....")
     maxmode = (max(dream, key=lambda k: dream[k]))
+    log.info("Formatting game mode name...")
     maxmode = re.sub("(BEDWARS_FOUR_FOUR_|BEDWARS_EIGHT_TWO_|BEDWARS_)", "", maxmode).lower()
+    log.info("Determined gamemode: " + maxmode)
     return maxmode
 
 
