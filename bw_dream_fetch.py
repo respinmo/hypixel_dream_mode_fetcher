@@ -25,6 +25,7 @@ def parse_all_args():
     parser = argparse.ArgumentParser(description="Fetch current Hypixel Bedwars dream Gamemode",
                                      epilog="Overengineered? - no...")
     parser.add_argument("configfile", nargs="?", default="config.ini", help="The config file to be used")
+    parser.add_argument("--short", "-s", default=False, action="store_true", help="Do not wait for a button to be pressed after running")
     parser.add_argument("--key", "-k", required=False, help="manually provided API-Key")
     parser.add_argument("--history", default="history.txt", help="The history file to be used(TBI)")
     parser.add_argument("--all", "-a", default=False, action="store_true",
@@ -76,9 +77,10 @@ def read_and_replace_url_dict(filename):
     config = configparser.ConfigParser()
     config.read(filename)
     log.info("Success!")
-    log.info("Overwriting internal URL-Configuration...")
     global API_ENDPOINT_URLS
-    API_ENDPOINT_URLS = config["API_CONFIG"]
+    if API_ENDPOINT_URLS != config["API_CONFIG"]:
+        log.info("Overwriting internal URL-Configuration...")
+        API_ENDPOINT_URLS = config["API_CONFIG"]
 
 
 # checking for correctness of elements
@@ -96,6 +98,13 @@ def check_api_key_working(api_key):
         return False
 
 
+def check_validness_of_request(response, url):
+    if response.json()["success"]:
+        log.info("Url: " + url + "is valid!")
+    else:
+        log.error("Url: " + url + "is not valid!")
+        exit(3)
+
 # api accessing functions
 def get_hypixel_playercount(api_key):
     headers = {
@@ -103,6 +112,7 @@ def get_hypixel_playercount(api_key):
     }
     log.info("Attempting to retrieve playercounts...")
     response = requests.get(API_ENDPOINT_URLS["playercount"], headers=headers)
+    check_validness_of_request(response, API_ENDPOINT_URLS["playercount"])
     log.info("Success!")
     return response
 
@@ -113,6 +123,7 @@ def get_hypxiel_game_modes(api_key):
     }
     log.info("Attempting to retrieve names of all game modes...")
     response = requests.get(API_ENDPOINT_URLS["games"], headers=headers)
+    check_validness_of_request(response, API_ENDPOINT_URLS["games"])
     log.info("Success!")
     return response.json()["games"]["BEDWARS"]["modeNames"]
 
@@ -187,6 +198,8 @@ def main():
     else:
         print(extract_highest_dream_game_mode(json, api_key))
 
+    if not args.short:
+        input("press any key to exit")
 
 if __name__ == '__main__':
     main()
