@@ -32,6 +32,7 @@ def parse_all_args():
                         help="Display All Dream Game Modes along with player Count")
     parser.add_argument("--verbose", "-v", default=False, action="store_true",
                         help="Enable additional potentially helpfull output")
+    parser.add_argument("--prettify", "-p", default=False, action="store_true", help="Output Gamemode in a fancy ASCII-Font (requires pyfiglet to be installed)")
     return parser.parse_args()
 
 
@@ -162,6 +163,18 @@ def extract_highest_dream_game_mode(count_json, api_key):
     return maxmode
 
 
+def convert_to_ascii_text_art(text):
+    try:
+        log.info("Attempting to import pyfiglet...")
+        from pyfiglet import Figlet, FigletFont
+        import random
+        log.info("Success!")
+        f = Figlet(font=random.choice(FigletFont.getFonts()))
+        return f.renderText(text)
+    except ImportError as error:
+        log.error("Using the pretty option requires pyfiglet to be installed")
+        return text
+
 # main routine functions
 
 def try_read_create_config_file(config_file_name):
@@ -195,9 +208,10 @@ def main():
     if args.all:
         for i in get_dream_modes_count(json, api_key).items():
             print(i[0] + ": " + str(i[1]))
+    if args.prettify:
+        print(convert_to_ascii_text_art(extract_highest_dream_game_mode(json, api_key)))
     else:
         print(extract_highest_dream_game_mode(json, api_key))
-
     if not args.short:
         input("press any key to exit")
 
