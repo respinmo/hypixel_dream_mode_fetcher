@@ -103,7 +103,7 @@ def check_validness_of_request(response, url):
     if response.json()["success"]:
         log.info("Url: " + url + "is valid!")
     else:
-        log.error("Url: " + url + "is not valid!")
+        log.error("Url: " + url + "did not return a valid result!")
         exit(3)
 
 # api accessing functions
@@ -175,6 +175,10 @@ def convert_to_ascii_text_art(text):
         log.error("Using the pretty option requires pyfiglet to be installed")
         return text
 
+
+def get_current_gammeode_name(api_key):
+    json = get_hypixel_playercount(api_key).json()
+    return extract_highest_dream_game_mode(json, api_key)
 # main routine functions
 
 def try_read_create_config_file(config_file_name):
