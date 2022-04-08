@@ -104,7 +104,8 @@ def check_validness_of_request(response, url):
         log.info("Url: " + url + "is valid!")
     else:
         log.error("Url: " + url + "did not return a valid result!")
-        exit(3)
+        if __name__ == "__main__":
+            exit(3)
 
 # api accessing functions
 def get_hypixel_playercount(api_key):
