@@ -214,7 +214,7 @@ def main():
     if args.all:
         for i in get_dream_modes_count(json, api_key).items():
             print(i[0] + ": " + str(i[1]))
-    if args.prettify:
+    elif args.prettify:
         print(convert_to_ascii_text_art(extract_highest_dream_game_mode(json, api_key)))
     else:
         print(extract_highest_dream_game_mode(json, api_key))
