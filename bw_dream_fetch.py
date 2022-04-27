@@ -219,7 +219,7 @@ def main():
     else:
         print(extract_highest_dream_game_mode(json, api_key))
     if not args.short:
-        input("press any key to exit")
+        input("press ENTER to exit")
 
 if __name__ == '__main__':
     main()
